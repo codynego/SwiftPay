@@ -127,7 +127,6 @@ class PaymentRequestDetail(generics.GenericAPIView):
         if paymentrequest.recipient != user:
             return Response({'message': 'unauthorized'}, status=status.HTTP_403_FORBIDDEN)
         else:
-            status = request.data['status']
-            paymentrequest.status = status
+            paymentrequest.status = request.data['status']
             serializer = self.get_serializer(paymentrequest)
             return Response(serializer.data)

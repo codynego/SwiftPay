@@ -68,7 +68,7 @@ class PaymentRequest(models.Model):
     )
     uid = models.UUIDField(primary_key=True, unique=True, default=uuid4)
     sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='requests')
-    recipient = models.ForeignKey(User, on_delete=models.CASCADE)
+    recipient = models.CharField(max_length=100, blank=False)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     description = models.CharField(max_length=100, blank=True)
     status = models.CharField(max_length=10, choices=REQUEST_CHOICES, default='pending')
