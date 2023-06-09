@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Account, Payment, Transaction, PaymentRequest
+from .models import Account, Transaction, PaymentRequest
 from users.serializers import UserSerializer
 from .tasks import initialize_transaction_task
 from users.models import User
@@ -16,7 +16,7 @@ class AccountSerializer(serializers.ModelSerializer):
 class PaymentSerializer(serializers.ModelSerializer):
     pin = serializers.IntegerField(write_only=True)
     class Meta:
-        model = Payment
+        model = Transaction
         fields = ['beneficiary_username', 'amount', 'description', 'status', 'created_at', 'pin']
         read_only_fields = ('created_at', 'status')
 

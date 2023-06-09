@@ -114,11 +114,11 @@ class PaymentRequestDetail(generics.GenericAPIView):
             paymentrequest.amount = request.data.get('amount', paymentrequest.amount)
             paymentrequest.save()
             serializer = self.get_serializer(paymentrequest)
-            if request.data['status'] == 'approved':
+            if paymentrequest.status == 'approved':
                 update = update_account(
                     amount=paymentrequest.amount,
                     sender=user,
-                    recipient=paymentrequest.recipient,
+                    recipient=recipient,
                     description=paymentrequest.description,
                     trans_type='transfer'
                 )
