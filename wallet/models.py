@@ -18,31 +18,28 @@ class Account(models.Model):
         return self.user.username
 
 
-class Payment(models.Model):
+class Transaction(models.Model):
+    TRANSACTION_TYPE = (
+        ('tranfer', 'transfer'),
+        ('deposit', 'deposit')
+    )
     TRANSACTION_STATUS = (
         ('completed', 'completed'),
         ('pending', 'pending'),
         ('failed', 'failed')
     )
     account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='payment')
-    beneficiary_account_number = models.IntegerField(null=True, blank=True)
+    beneficiary_username = models.CharField(max_length=255, blank=True, null=True,)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     description = models.CharField(max_length=255, blank=True)
     status = models.CharField(max_length=20, choices=TRANSACTION_STATUS)
     created_at = models.DateField(auto_now_add=True)
-
-
-
-class Transaction(Payment):
-    TRANSACTION_TYPE = (
-        ('tranfer', 'transfer'),
-        ('deposit', 'deposit')
-    )
     trans_type = models.CharField(max_length=20, choices=TRANSACTION_TYPE)
     paystack_payment_reference = models.CharField(max_length=100, default='', blank=True)
 
     def __str__(self):
         return self.account.user.__str__()
+    
 
 
 class BasePayment(models.Model):

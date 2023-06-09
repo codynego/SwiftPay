@@ -1,11 +1,12 @@
 from django.shortcuts import render
 from .serializers import AccountSerializer, PaymentSerializer, TransactionSerializer, DepositSerializer, PaymentRequestSerializer
 from rest_framework.views import APIView
-from .models import Account, Payment, Transaction, PaymentRequest
+from .models import Account, Transaction, PaymentRequest
 from rest_framework import generics, status
 from rest_framework.response import Response
 from users.models import User
 from django.db.models import Q
+from .utils import update_account
 
 
 # Create your views here.
@@ -29,7 +30,7 @@ class WalletBalance(APIView):
 
 
 class TransferView(generics.GenericAPIView):
-    queryset = Payment.objects.all()
+    queryset = Transaction.objects.all()
     serializer_class = PaymentSerializer
 
     def post(self, request):
@@ -39,25 +40,6 @@ class TransferView(generics.GenericAPIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.error, status=status.HTTP_400_BAD_REQUEST)
-
-class PaymentsView(generics.GenericAPIView):
-    queryset = Payment.objects.all()
-    serializer_class = PaymentSerializer
-
-    def get(self, request):
-        queryset = Payment.objects.filter(account__user=request.user)
-        serializer = self.get_serializer(queryset, many=True)
-
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-
-class PaymentDetail(generics.RetrieveAPIView):
-    queryset = Payment.objects.all()
-    serializer_class = PaymentSerializer
-
-    def get_queryset(self):
-        queryset = Payment.objects.filter(account__user=self.request.user)
-        return queryset
     
         
 class TransactionHistory(generics.ListAPIView):
@@ -124,9 +106,20 @@ class PaymentRequestDetail(generics.GenericAPIView):
     def patch(self, request, pk):
         paymentrequest = PaymentRequest.objects.get(uid=pk)
         user = request.user
-        if paymentrequest.recipient != user:
+        recipient = User.objects.get(username=paymentrequest.recipient)
+        if recipient != user:
             return Response({'message': 'unauthorized'}, status=status.HTTP_403_FORBIDDEN)
         else:
             paymentrequest.status = request.data['status']
+            paymentrequest.amount = request.data.get('amount', paymentrequest.amount)
+            paymentrequest.save()
             serializer = self.get_serializer(paymentrequest)
+            if request.data['status'] == 'approved':
+                update = update_account(
+                    amount=paymentrequest.amount,
+                    sender=user,
+                    recipient=paymentrequest.recipient,
+                    description=paymentrequest.description,
+                    trans_type='transfer'
+                )
             return Response(serializer.data)

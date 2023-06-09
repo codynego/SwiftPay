@@ -3,6 +3,7 @@ from .models import Account, Payment, Transaction, PaymentRequest
 from users.serializers import UserSerializer
 from .tasks import initialize_transaction_task
 from users.models import User
+from .utils import update_account
 
 class AccountSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
@@ -16,7 +17,7 @@ class PaymentSerializer(serializers.ModelSerializer):
     pin = serializers.IntegerField(write_only=True)
     class Meta:
         model = Payment
-        fields = ['beneficiary_account_number', 'amount', 'description', 'status', 'created_at', 'pin']
+        fields = ['beneficiary_username', 'amount', 'description', 'status', 'created_at', 'pin']
         read_only_fields = ('created_at', 'status')
 
     def get_pin(self, instance):
@@ -24,7 +25,8 @@ class PaymentSerializer(serializers.ModelSerializer):
 
 
     def create(self, attrs):
-        beneficiary_account_number = attrs['beneficiary_account_number']
+        #beneficiary_account_number = attrs['beneficiary_account_number']
+        beneficiary_username = attrs['beneficiary_username']
         amount = attrs['amount']
         description = attrs['description']
         pin = attrs['pin']
@@ -39,29 +41,15 @@ class PaymentSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('no user found')
         if sender_account.balance < amount:
             raise serializers.ValidationError('insuffiecient funds')
-        if sender_account.account_number == beneficiary_account_number:
+        if sender_account.user.username == beneficiary_username:
             raise serializers.ValidationError('invalid transaction')
-        beneficiary = Account.objects.get(account_number=beneficiary_account_number)
-        beneficiary.balance += amount
-        sender_account.balance -= amount
-        beneficiary.save()
-        sender_account.save()
 
-        payment = Payment.objects.create(
-            account=sender_account,
-            beneficiary_account_number = beneficiary_account_number,
-            amount = amount,
-            description = description,
-            status='completed'
-        )
-        transaction = Transaction.objects.create(
-            account=sender_account,
-            beneficiary_account_number = beneficiary_account_number,
-            amount = amount,
-            description = description,
-            status='completed',
-            trans_type = 'transfer',
-        )
+        beneficiary = User.objects.get(username=beneficiary_username)
+        
+        payment = update_account(amount, user, beneficiary,
+                                        description, "transfer")
+
+
         return payment
     
 
@@ -103,15 +91,13 @@ class PaymentRequestSerializer(serializers.ModelSerializer):
         description = attrs['description']
 
         if User.objects.filter(username=recipient).exists():
-            recipient_user = User.objects.get(username=recipient)
-        else:
-            raise serializers.ValidationError({'message': 'user doesnt exist'})
-
-        paymentrequest = PaymentRequest(
+            paymentrequest = PaymentRequest(
             sender = user,
-            recipient=recipient_user,
+            recipient=recipient,
             amount=amount,
             description=description,
         )
-        paymentrequest.save()
+            paymentrequest.save()
+        else:
+            raise serializers.ValidationError({'message': 'recipient doesnt exist'})
         return paymentrequest
