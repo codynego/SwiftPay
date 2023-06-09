@@ -26,5 +26,4 @@ urlpatterns = [
 
     # Payments Endpoints
     path('wallets/links/', PaymentLinkView.as_view(), name='paym'),
-    #path('wallets/payments/<int:pk>/', PaymentDetail.as_view(), name='payment'),
 ]

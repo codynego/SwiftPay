@@ -29,7 +29,7 @@ class Transaction(models.Model):
         ('failed', 'failed')
     )
     account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='transaction', null=True)
-    beneficiary_username = models.CharField(max_length=255, blank=True, null=True,)
+    beneficiary = models.CharField(max_length=255, blank=True, null=True,)
     amount = models.DecimalField(max_digits=10, decimal_places=2, null=True)
     description = models.CharField(max_length=255, blank=True, null=True)
     status = models.CharField(max_length=20, choices=TRANSACTION_STATUS, null=True)

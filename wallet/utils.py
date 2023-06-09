@@ -28,7 +28,7 @@ def update_account(amount: int, sender: User,
     recipient_account.save()
     transaction = Transaction.objects.create(
         account = sender_account,
-        beneficiary_username = recipient.username,
+        beneficiary = recipient.username,
         amount = amount,
         description = description,
         status='completed',

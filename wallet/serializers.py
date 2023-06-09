@@ -19,7 +19,7 @@ class PaymentSerializer(serializers.ModelSerializer):
     pin = serializers.IntegerField(write_only=True)
     class Meta:
         model = Transaction
-        fields = ['beneficiary_username', 'amount', 'description', 'status', 'created_at', 'pin']
+        fields = ['beneficiary', 'amount', 'description', 'status', 'created_at', 'pin']
         read_only_fields = ('created_at', 'status')
 
     def get_pin(self, instance):
@@ -28,7 +28,7 @@ class PaymentSerializer(serializers.ModelSerializer):
 
     def create(self, attrs):
         #beneficiary_account_number = attrs['beneficiary_account_number']
-        beneficiary_username = attrs['beneficiary_username']
+        beneficiary_username = attrs['beneficiary']
         amount = attrs['amount']
         description = attrs['description']
         pin = attrs['pin']
@@ -43,10 +43,10 @@ class PaymentSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('no user found')
         if sender_account.balance < amount:
             raise serializers.ValidationError('insuffiecient funds')
-        if sender_account.user.username == beneficiary_username:
+        if sender_account.user.username == beneficiary:
             raise serializers.ValidationError('invalid transaction')
 
-        beneficiary = User.objects.get(username=beneficiary_username)
+        beneficiary = User.objects.get(username=beneficiary)
         
         payment = update_account(amount, user, beneficiary,
                                         description, "transfer")
@@ -137,8 +137,8 @@ class PaymentwithLinkSerializer(serializers.ModelSerializer):
     pin = serializers.IntegerField(write_only=True)
     class Meta:
         model = Transaction
-        fields = ['beneficiary_username', 'amount', 'description', 'status', 'created_at', 'pin']
-        read_only_fields = ('beneficiary_username','created_at', 'status', 'amount', )
+        fields = ['beneficiary', 'amount', 'description', 'status', 'created_at', 'pin']
+        read_only_fields = ('beneficiary','created_at', 'status', 'amount', )
 
     def get_pin(self, instance):
         return instance.account.user.pin

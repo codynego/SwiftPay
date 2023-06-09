@@ -9,6 +9,10 @@ djangorestframework-simplejwt = "*"
 djangorestframework = "*"
 celery = "*"
 redis = "*"
+coreapi = "*"
+pyyaml = "*"
+django-rest-swagger = "*"
+drf-yasg = "*"
 
 [dev-packages]
 

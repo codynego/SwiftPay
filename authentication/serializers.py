@@ -41,11 +41,11 @@ class LoginSerializer(serializers.Serializer):
 
     
 class EmailVerificationSerializer(serializers.ModelSerializer):
-    otp = serializers.CharField(max_length=10)
+    otp_code = serializers.CharField(max_length=10)
 
-class Meta:
-    model = OTP
-    fields = ['otp_code']
+    class Meta:
+        model = OTP
+        fields = ['otp_code']
 
 class ResendVerificationEmailSerializer(serializers.ModelSerializer):
     class Meta:
