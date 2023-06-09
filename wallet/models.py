@@ -42,19 +42,15 @@ class Transaction(models.Model):
     
 
 
-class BasePayment(models.Model):
+class PaymentLInk(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=50, blank=False)
     description = models.CharField(max_length=100, blank=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
+    link_code = models.CharField(max_length=50, blank=False, null=True)
+    link = models.URLField(max_length=50, null=True, blank=True)
+    qrcode = models.ImageField(upload_to='img', null=True, blank=True)
     created_at = models.DateField(auto_now_add=True)
-
-
-class paymentlinks(BasePayment):
-    link = models.URLField(max_length=50)
-
-class PaymentQrcode(BasePayment):
-    qrcode = models.ImageField(upload_to='img')
 
 
 class PaymentRequest(models.Model):

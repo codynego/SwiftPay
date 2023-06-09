@@ -1,12 +1,13 @@
 from django.shortcuts import render
-from .serializers import AccountSerializer, PaymentSerializer, TransactionSerializer, DepositSerializer, PaymentRequestSerializer
+from .serializers import AccountSerializer, PaymentSerializer, TransactionSerializer, DepositSerializer, PaymentRequestSerializer, PaymentLInkSerializer, PaymentwithLinkSerializer
 from rest_framework.views import APIView
-from .models import Account, Transaction, PaymentRequest
+from .models import Account, Transaction, PaymentRequest, PaymentLInk
 from rest_framework import generics, status
 from rest_framework.response import Response
 from users.models import User
 from django.db.models import Q
 from .utils import update_account
+
 
 
 # Create your views here.
@@ -123,3 +124,32 @@ class PaymentRequestDetail(generics.GenericAPIView):
                     trans_type='transfer'
                 )
             return Response(serializer.data)
+        
+class PaymentLinkView(generics.GenericAPIView):
+    queryset = PaymentLInk.objects.all() 
+    serializer_class = PaymentLInkSerializer
+    
+    def get(self, request):
+        queryset = PaymentLInk.objects.filter(user=request.user)
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        
+class PaywithLinkView(generics.GenericAPIView):
+    serializer_class = PaymentwithLinkSerializer
+    queryset = Transaction.objects.all()
+
+
+    def post(self, request, id):
+        serializer = self.get_serializer(data=request.data,
+                                         context={'request': request, 'link': id})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response(serializer.error, status=status.HTTP_400_BAD_REQUEST)

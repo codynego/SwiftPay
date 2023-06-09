@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import WalletView, WalletDetailView, TransactionHistory, Transactiondetail, TransferView, WalletBalance, DepositFunds, PaymentRequestView, PaymentRequestDetail
+from .views import WalletView, WalletDetailView, TransactionHistory, Transactiondetail, TransferView, WalletBalance, DepositFunds, PaymentRequestView, PaymentRequestDetail, PaymentLinkView, PaywithLinkView
 
 urlpatterns = [
     path('wallets/', WalletView.as_view(), name='wallets'),
@@ -16,7 +16,7 @@ urlpatterns = [
 
     # wallet to wallet payment
     path('wallets/transfer/', TransferView.as_view(), name='payments'),
-    #path('wallets/<str:username>/pay/', TransferView.as_view(), name='payments'),
+    path('wallets/pay/<str:id>/', PaywithLinkView.as_view(), name='pay'),
     
 
     # Transactions Endpoints
@@ -25,6 +25,6 @@ urlpatterns = [
 
 
     # Payments Endpoints
-    #path('wallets/payments/history/', PaymentsView.as_view(), name='payments'),
+    path('wallets/links/', PaymentLinkView.as_view(), name='paym'),
     #path('wallets/payments/<int:pk>/', PaymentDetail.as_view(), name='payment'),
 ]

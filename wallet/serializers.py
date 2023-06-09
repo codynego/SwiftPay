@@ -1,9 +1,11 @@
 from rest_framework import serializers
-from .models import Account, Transaction, PaymentRequest
+from .models import Account, Transaction, PaymentRequest, PaymentLInk
 from users.serializers import UserSerializer
 from .tasks import initialize_transaction_task
 from users.models import User
-from .utils import update_account
+from .utils import update_account, generate_code
+from django.contrib.sites.shortcuts import get_current_site
+from django.urls import reverse
 
 class AccountSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
@@ -101,3 +103,61 @@ class PaymentRequestSerializer(serializers.ModelSerializer):
         else:
             raise serializers.ValidationError({'message': 'recipient doesnt exist'})
         return paymentrequest
+    
+
+class PaymentLInkSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PaymentLInk
+        exclude = ('user',)
+        read_only_fields = ['link', 'qrcode', 'created_at', 'link_code']
+
+    
+    def create(self, attrs):
+        title = attrs['title']
+        description = attrs['description']
+        amount = attrs['amount']
+        request = self.context.get('request')
+        code = generate_code()
+
+        current_site = get_current_site(request)
+        relative_link = reverse('pay', kwargs={'id': code})
+        link = 'http://' + current_site.domain + relative_link
+        payment_link = PaymentLInk.objects.create(
+            user = request.user,
+            title=title,
+            description=description,
+            amount=amount,
+            link_code = code,
+            link = link
+        )
+        return payment_link
+    
+
+class PaymentwithLinkSerializer(serializers.ModelSerializer):
+    pin = serializers.IntegerField(write_only=True)
+    class Meta:
+        model = Transaction
+        fields = ['beneficiary_username', 'amount', 'description', 'status', 'created_at', 'pin']
+        read_only_fields = ('beneficiary_username','created_at', 'status', 'amount', )
+
+    def get_pin(self, instance):
+        return instance.account.user.pin
+
+    
+    def create(self, attrs):
+        payment_links = PaymentLInk.objects.get(link_code=self.context['link'])
+        user = self.context['request'].user
+
+        recipient = payment_links.user
+        amount = payment_links.amount
+        description = attrs['description']
+
+        pin = attrs['pin']
+
+        if user.pin != pin:
+            raise serializers.ValidationError('invalid pin')
+        
+        transaction = update_account(amount, user, recipient, description, trans_type="transfer")
+
+        return transaction
+    

@@ -1,6 +1,8 @@
 from .models import Account, Transaction
 from users.models import User
 from decimal import Decimal
+import random
+import string
 
 
 def update_account(amount: int, sender: User,
@@ -34,3 +36,12 @@ def update_account(amount: int, sender: User,
     )
     transaction.save()
     return transaction
+
+
+def generate_code():
+    length = 8
+    letters = string.ascii_letters
+    digits = string.digits
+    characters = letters + digits 
+    code = ''.join(random.choice(characters) for _ in range(length))
+    return code
