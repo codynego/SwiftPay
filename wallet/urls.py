@@ -16,7 +16,7 @@ urlpatterns = [
 
     # wallet to wallet payment
     path('wallets/transfer/', TransferView.as_view(), name='payments'),
-    path('wallets/pay/<str:id>/', PaywithLinkView.as_view(), name='pay'),
+    path('wallets/@<str:usr>/<str:id>/', PaywithLinkView.as_view(), name='pay'),
     
 
     # Transactions Endpoints

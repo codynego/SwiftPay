@@ -21,9 +21,9 @@ from rest_framework import permissions
 
 schema_view = get_schema_view(
     openapi.Info(
-        title="SocialNet",
+        title="SwiftPay",
         default_version='v1',
-        description="A social media application",
+        description="A Peer to Peer Payment API",
         terms_of_service="https://www.ourapp.com/policies/terms/",
         contact=openapi.Contact(email="emonenaabednego@gmail.com"),
         license=openapi.License(name="Test License"),
@@ -37,7 +37,6 @@ urlpatterns = [
     path('api/auth/', include('authentication.urls')),
     path('api/', include('users.urls')),
     path('api/', include('wallet.urls')),
-    path('', schema_view.as_view()),  # Use .as_view() for SchemaView
     re_path(r'^playground/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     re_path(r'^docs/$', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 ]

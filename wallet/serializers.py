@@ -11,7 +11,7 @@ class AccountSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
     class Meta:
         model = Account
-        fields = ['user', 'account_number', 'balance']
+        fields = ['user', 'balance']
 
 
 
@@ -27,8 +27,7 @@ class PaymentSerializer(serializers.ModelSerializer):
 
 
     def create(self, attrs):
-        #beneficiary_account_number = attrs['beneficiary_account_number']
-        beneficiary_username = attrs['beneficiary']
+        beneficiary = attrs['beneficiary']
         amount = attrs['amount']
         description = attrs['description']
         pin = attrs['pin']

@@ -13,6 +13,9 @@ from .utils import update_account
 # Create your views here.
 
 class WalletView(generics.ListAPIView):
+    """
+    wallet documentation
+    """
     queryset = Account.objects.all()
     serializer_class = AccountSerializer
 

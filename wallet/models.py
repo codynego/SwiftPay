@@ -8,9 +8,8 @@ class Account(models.Model):
         ('current', 'current'),
     )"""
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='account')
-    account_number = models.IntegerField()
     balance = models.DecimalField(max_digits=10, decimal_places=2)
-    currency = models.CharField(max_length=50, default='NGN', null=True)
+    currency = models.CharField(max_length=50, default='NGN', null=True, blank=True)
     created_at = models.DateField(auto_now_add=True)
     updated_at = models.DateField(auto_now=True)
 

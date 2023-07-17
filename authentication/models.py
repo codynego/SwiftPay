@@ -19,7 +19,7 @@ class OTP(models.Model):
     @staticmethod
     def generate_otp(user):
         length = 6
-        characters = string.digit  # Use digits (0-9) for OTP generation
+        characters = string.digits  # Use digits (0-9) for OTP generation
         otp = ''.join(random.choice(characters) for _ in range(length))
 
         OTP.objects.filter(user=user).delete()

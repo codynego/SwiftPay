@@ -9,7 +9,6 @@ class User(AbstractUser):
     date_of_birth = models.DateField(blank=True, null=True)
     address = models.CharField(max_length=255, blank=True)
     nationality = models.CharField(max_length=50, blank=True)
-    bvn = models.IntegerField(blank=True, null=True)
     profile_picture = models.ImageField(upload_to='img', blank=True, null=True)
     account_balance = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     is_verified = models.BooleanField(default=False)

@@ -17,6 +17,7 @@ from wallet.models import Account
 class RegistrationView(generics.GenericAPIView):
     queryset = User.objects.all()
     serializer_class = RegistrationSerializer
+    permission_classes = (AllowAny,)
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -24,7 +25,6 @@ class RegistrationView(generics.GenericAPIView):
         user = serializer.save()
         account = Account.objects.create(
             user = user,
-            account_number = user.phone_number,
             balance = 0,
         )
         account.save()
@@ -45,6 +45,7 @@ class RegistrationView(generics.GenericAPIView):
 
 class LoginView(generics.GenericAPIView):
     serializer_class = LoginSerializer
+    permission_classes = (AllowAny,)
 
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
@@ -69,6 +70,8 @@ class LoginView(generics.GenericAPIView):
 
 class EmailVerificationView(generics.GenericAPIView):
     serializer_class = EmailVerificationSerializer
+    permission_classes = (AllowAny,)
+
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
@@ -78,12 +81,14 @@ class EmailVerificationView(generics.GenericAPIView):
                 user = User.objects.get(id=user_id)
                 user.is_verified = True
                 user.save()
-            return Response({'Email Successfully verified'}, status = status.HTTP_200_OK)
+                return Response({'Email Successfully verified'}, status = status.HTTP_200_OK)
+            else:
+                return Response({'invalid OTP'}, status = status.HTTP_404_NOT_FOUND)
 
 
 class LogoutView(generics.GenericAPIView):
     serializer_class = LogoutSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (AllowAny,)
 
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
