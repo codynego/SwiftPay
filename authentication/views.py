@@ -76,9 +76,9 @@ class EmailVerificationView(generics.GenericAPIView):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             otp_code = serializer.validated_data['otp_code']
-            if OTP.objects.filter(otp_code=otp_code, user=request.user).exists():
-                user_id = request.user.id
-                user = User.objects.get(id=user_id)
+            email = serializer.validated_data['email']
+            if OTP.objects.filter(otp_code=otp_code, user=User.objects.get(email=email).exists():
+                user = User.objects.get(email=email)
                 user.is_verified = True
                 user.save()
                 return Response({'Email Successfully verified'}, status = status.HTTP_200_OK)
